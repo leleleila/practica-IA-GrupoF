@@ -1,4 +1,5 @@
 using NavigationDJIA.World;
+using UnityEngine;
 
 /// <summary>
 /// TODO(alumno):
@@ -23,26 +24,41 @@ using NavigationDJIA.World;
 ///  ya que esa clave se usará como índice en la TablaQ y en el archivo CSV.
 /// </summary>
 
-namespace GrupoA
+namespace GrupoF
 {
     public sealed class QState
     {
-        public int AgentX { get; }
-        public int AgentY { get; }
-        public int OtherX { get; }
-        public int OtherY { get; }
 
-        public QState(CellInfo agent, CellInfo other)
+        // La distancia entre el agente y el jugador
+        public float Distance { get; }
+
+        // A que direcciones se puede mover actualmente
+        public bool CanMoveUp { get; }
+        public bool CanMoveDown { get; }
+        public bool CanMoveRight { get; }
+        public bool CanMoveLeft { get; }
+
+        // Almacenamos en que dirección relativa se encuentra el jugador
+        private int xDirection { get; }
+        private int yDirection { get; }
+
+        public QState(CellInfo agent, CellInfo other, WorldInfo worldInfo)
         {
-            AgentX = agent.x;
-            AgentY = agent.y;
-            OtherX = other.x;
-            OtherY = other.y;
+            Distance = agent.Distance(other, CellInfo.DistanceType.Manhattan);
+
+            CanMoveUp = worldInfo[agent.x, agent.y + 1].Walkable;
+            CanMoveDown = worldInfo[agent.x, agent.y - 1].Walkable;
+            CanMoveRight = worldInfo[agent.x + 1, agent.y].Walkable;
+            CanMoveLeft = worldInfo[agent.x - 1, agent.y].Walkable;
+
+            xDirection = other.x - agent.x;
+            yDirection = other.y - agent.y;
         }
 
         public string ToKey()
         {
-            return $"{AgentX},{AgentY}|{OtherX},{OtherY}";
+            return $"{CanMoveUp},{CanMoveDown},{CanMoveRight},{CanMoveLeft}"
+            + $"|{xDirection},{yDirection}";
         }
     }
 }

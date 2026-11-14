@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using QMind;
+using UnityEngine;
 
-namespace GrupoA
+namespace GrupoF
 {
     public class QTable
     {
@@ -35,8 +37,9 @@ namespace GrupoA
         /// </summary>
         public float GetQ(string stateKey, QAction action)
         {
-            // Implementa aquí la lectura de Q(s,a) desde la tabla
-            throw new NotImplementedException();
+            EnsureState(stateKey);
+            int index = (int)action;
+            return _storage.Data[stateKey][index];
         }
 
         /// <summary>
@@ -52,8 +55,9 @@ namespace GrupoA
         /// </summary>
         public void SetQ(string stateKey, QAction action, float value)
         {
-            // Implementa aquí la escritura de Q(s,a) en la tabla
-            throw new NotImplementedException();
+            EnsureState(stateKey);
+            int index = (int)action;
+            _storage.Data[stateKey][index] = value;
         }
 
         /// <summary>
@@ -69,10 +73,30 @@ namespace GrupoA
         ///        var qValues = _storage.Data[stateKey];
         ///  3. Recorre el array buscando el valor máximo y devuélvelo.
         /// </summary>
-        public float GetMaxQ(string stateKey)
+        public float GetMaxQ(string stateKey, HashSet<QAction> validActions, out QAction action)
         {
-            // Implementa aquí el cálculo de max_a Q(s,a)
-            throw new NotImplementedException();
+            // Usamos un parámetro con la keyword 'out' para delvolver la acción correspondiente al valor máximo Q (solo teniendo en cuenta aquellas
+            // aquellas acciones válidas, determindas en el conjunto validActions, asingadas en la función UpdateValidActions en QMindTrainer/QMindTester)
+            // aprovechando el bucle for y no tener que volverlo a buscar en el método GetBestAction
+            
+            EnsureState(stateKey);
+            float[] qValues = _storage.Data[stateKey];
+
+            float currentMaxQValue = float.NegativeInfinity;
+            action = default;
+
+            foreach (QAction validAction in validActions)
+            {
+                int index = (int)validAction;
+                float actionQValue = qValues[index];
+                if (actionQValue > currentMaxQValue)
+                {
+                    currentMaxQValue = actionQValue;
+                    action = validAction;
+                }
+            }
+
+            return currentMaxQValue;
         }
 
         /// <summary>
@@ -92,10 +116,15 @@ namespace GrupoA
         ///  4. Convierte ese índice a QAction:
         ///        return (QAction)bestIndex;
         /// </summary>
-        public QAction GetBestAction(string stateKey)
+        public QAction GetBestAction(string stateKey, HashSet<QAction> validActions)
         {
-            // Implementa aquí la selección de la mejor acción según la Tabla Q
-            throw new NotImplementedException();
+            EnsureState(stateKey);
+
+            // En vez de iterar otra vez por el array para ver que valor Q conicide con el de la lista de acciones
+            // podemos hacer que la propia función de getmaxq devuelva la acción que tiene el valor Q maximo usando
+            // la keyword de c# de 'out' y ahorramos proceso de cpu omitiendo una iteración redundante
+            GetMaxQ(stateKey, validActions, out QAction bestAction);
+            return bestAction;
         }
 
         public void SaveToCsv()
