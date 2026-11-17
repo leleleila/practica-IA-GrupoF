@@ -39,8 +39,8 @@ namespace GrupoF
         public bool CanMoveLeft { get; }
 
         // Almacenamos en que dirección relativa se encuentra el jugador
-        private int xDirection { get; }
-        private int yDirection { get; }
+        private int XDirection { get; }
+        private int YDirection { get; }
 
         public QState(CellInfo agent, CellInfo other, WorldInfo worldInfo)
         {
@@ -51,14 +51,14 @@ namespace GrupoF
             CanMoveRight = worldInfo[agent.x + 1, agent.y].Walkable;
             CanMoveLeft = worldInfo[agent.x - 1, agent.y].Walkable;
 
-            xDirection = other.x - agent.x;
-            yDirection = other.y - agent.y;
+            XDirection = other.x - agent.x;
+            YDirection = other.y - agent.y;
         }
 
         public string ToKey()
         {
             return $"{CanMoveUp},{CanMoveDown},{CanMoveRight},{CanMoveLeft}"
-            + $"|{xDirection},{yDirection}";
+            + $"|{XDirection},{YDirection}";
         }
     }
 }

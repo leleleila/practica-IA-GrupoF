@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using NavigationDJIA.Interfaces;
 using NavigationDJIA.World;
 using QMind;
 using QMind.Interfaces;
-using UnityEngine;
 
 namespace GrupoF
 {
@@ -42,7 +40,10 @@ namespace GrupoF
 
         #endregion
 
+        // Lista de acciones válidas
         private readonly HashSet<QAction> validActions = new();
+
+        // Distancia del estado anterior
         private float previousDistance = -1;
 
         public void Initialize(QMindTrainerParams qMindTrainerParams, WorldInfo worldInfo, INavigationAlgorithm navigationAlgorithm)
@@ -117,7 +118,7 @@ namespace GrupoF
                 UpdateQ(stateKey, action, reward, nextStateKey, isTerminalState);
             }
 
-            // actualiza las posiciones
+            // Actualiza las posiciones
             _agentPosition = newAgentPos;
             _otherPosition = newOtherPos;
 
@@ -148,12 +149,14 @@ namespace GrupoF
         /// </summary>
         private QAction ChooseAction(QState state, bool train)
         {
+            // En exploración:
             if (train && _random.NextDouble() < _params.epsilon)
             {
                 // Obtenemos una acción aleatoria entre las acciones válidas
                 return validActions.ToList()[_random.Next(validActions.Count)];
             }
-            else
+            // En explotación:
+            else 
             {
                 return _qTable.GetBestAction(state.ToKey(), validActions);
             }
@@ -233,7 +236,7 @@ namespace GrupoF
             else
             {
                 // Recompensamos si aumenta la distancia
-                // y penalizamos si disminuye.
+                // y penalizamos si disminuye o se queda quieto
                 reward = (state.Distance - previousDistance) * 2f - 1f;
             }
 
@@ -253,7 +256,7 @@ namespace GrupoF
 
         private CellInfo ApplyAction(CellInfo agentCell, QAction action)
         {
-            int nx = agentCell.x; ;
+            int nx = agentCell.x;
             int ny = agentCell.y;
 
             switch (action)

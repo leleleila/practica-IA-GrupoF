@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using NavigationDJIA.World;
 using QMind;
 using QMind.Interfaces;
-using UnityEngine;
 
 namespace GrupoF
 {
@@ -12,6 +11,7 @@ namespace GrupoF
         private QTableStorage _qStorage;
         private QTable _qTable;
 
+        // Lista de acciones válidas
         private readonly HashSet<QAction> validActions = new();
 
         public void Initialize(WorldInfo worldInfo)
