@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "PracticaIA.slnx"
+    "dotnet.defaultSolution": "practica-IA-GrupoF.slnx"
 }
