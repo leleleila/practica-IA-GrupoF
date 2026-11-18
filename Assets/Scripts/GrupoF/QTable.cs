@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using QMind;
+using UnityEngine;
 
 namespace GrupoF
 {
@@ -77,25 +78,34 @@ namespace GrupoF
             // Usamos un parámetro con la keyword 'out' para delvolver la acción correspondiente al valor máximo Q (solo teniendo en cuenta aquellas
             // aquellas acciones válidas, determindas en el conjunto validActions, asingadas en la función UpdateValidActions en QMindTrainer/QMindTester)
             // aprovechando el bucle for y no tener que volverlo a buscar en el método GetBestAction
-            
+
             EnsureState(stateKey);
             float[] qValues = _storage.Data[stateKey];
-
-            float currentMaxQValue = float.NegativeInfinity;
-            action = default;
+            float maxQ = float.NegativeInfinity;
+            
+            // Almacenamos multiples acciones con mayor Q, dado que existe la posibilidad de empate
+            List<QAction> bestActions = new();
 
             foreach (QAction validAction in validActions)
             {
                 int index = (int)validAction;
                 float actionQValue = qValues[index];
-                if (actionQValue > currentMaxQValue)
+
+                if (actionQValue > maxQ)
                 {
-                    currentMaxQValue = actionQValue;
-                    action = validAction;
+                    maxQ = actionQValue;
+                    bestActions.Clear();
+                    bestActions.Add(validAction);
+                }
+                else if (Mathf.Approximately(actionQValue, maxQ))
+                {
+                    bestActions.Add(validAction);
                 }
             }
 
-            return currentMaxQValue;
+            // En caso de haber varias acciones que tengan el maximo valor Q, se escoge una aleatoriamente
+            action = bestActions[UnityEngine.Random.Range(0, bestActions.Count)];
+            return maxQ;
         }
 
         /// <summary>

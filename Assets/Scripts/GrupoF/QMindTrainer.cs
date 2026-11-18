@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using NavigationDJIA.Interfaces;
 using NavigationDJIA.World;
@@ -105,17 +106,18 @@ namespace GrupoF
             CellInfo newOtherPos = MoveOpponent(_otherPosition, newAgentPos.Walkable ? newAgentPos : _agentPosition);
 
             // Nuevo estado del agente
-            QState nextState = BuildStateKey(newAgentPos, newOtherPos, _worldInfo);
-            string nextStateKey = nextState.ToKey();
+            QState newState = BuildStateKey(newAgentPos, newOtherPos, _worldInfo);
+            string newStateKey = newState.ToKey();
 
             // Calcula la recompensa
-            float reward = ComputeReward(newAgentPos, newOtherPos, nextState);
+            float reward = ComputeReward(newAgentPos, newOtherPos, newState);
 
-            bool isTerminalState = IsTerminalState(_agentPosition, _otherPosition);
+            // Comprobamos si el paso nuevo (en vez del anterior) resulta en un estado terminal,
+            bool isTerminalState = IsTerminalState(newAgentPos, newOtherPos);
             if (train)
             {
-                UpdateValidActions(nextState);
-                UpdateQ(stateKey, action, reward, nextStateKey, isTerminalState);
+                UpdateValidActions(newState);
+                UpdateQ(stateKey, action, reward, newStateKey, isTerminalState);
             }
 
             // Actualiza las posiciones
@@ -156,7 +158,7 @@ namespace GrupoF
                 return validActions.ToList()[_random.Next(validActions.Count)];
             }
             // En explotación:
-            else 
+            else
             {
                 return _qTable.GetBestAction(state.ToKey(), validActions);
             }
@@ -221,24 +223,27 @@ namespace GrupoF
         /// </summary>
         private float ComputeReward(CellInfo agent, CellInfo other, QState state)
         {
-            float reward;
-
+            // El agente ha sido atrapado.
             if (agent == other)
             {
-                // El agente ha sido atrapado.
-                reward = -10f;
+                return -100f;
             }
-            else if (previousDistance == -1)
+
+            // Recompensamos al menos con 1 por el hecho de mantenerse vivo
+            float reward = 1f;
+
+            // Si existe un dato de  distancia del paso anterior ,se usa de referncia y se aplica 
+            // un bonus o una penalización en función de si el agente se ha alejado del perseguidor o se ha acercado
+            if (previousDistance != -1)
             {
-                // Si es primer paso, la recompensa será 0 porque no tenemos punto de referencia
-                reward = 0f;
+                reward += (state.Distance - previousDistance) * 0.5f;
             }
-            else
-            {
-                // Recompensamos si aumenta la distancia
-                // y penalizamos si disminuye o se queda quieto
-                reward = (state.Distance - previousDistance) * 2f - 1f;
-            }
+
+            // Penalizamos si el agente escoge caminos con pocas opciones de salida para evitar que se meta en callejones sin salida
+            if (state.CurrentExits == 1)
+                reward -= 2f;
+            else if (state.CurrentExits == 2)
+                reward -= 0.5f;
 
             previousDistance = state.Distance;
             return reward;

@@ -589,16 +589,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agent: {fileID: 1824630789}
   other: {fileID: 1518200256}
-  qLearningTrainerClass: QMind.QMindTrainerDummy, Assembly-CSharp, Version=0.0.0.0,
-    Culture=neutral, PublicKeyToken=null
+  qLearningTrainerClass: GrupoF.QMindTrainer, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
   showSimulation: 1
   agentSpeed: 3
-  train: 1
+  train: 0
   algorithmParams:
     alpha: 0.2
     epsilon: 0.85
     gamma: 0.9
-    episodes: 1000
+    episodes: 100000
     maxSteps: -1
     episodesBetweenSaves: 100
 --- !u!4 &430024629

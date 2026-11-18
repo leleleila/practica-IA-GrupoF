@@ -42,23 +42,79 @@ namespace GrupoF
         private int XDirection { get; }
         private int YDirection { get; }
 
-        public QState(CellInfo agent, CellInfo other, WorldInfo worldInfo)
+        // Contabilizamos cuantas salidas tiene la casilla actual y cada posible dirección (para evitar callejones sin salida)
+        public int CurrentExits { get; }
+        public int ExitsUp { get; }
+        public int ExitsDown { get; }
+        public int ExitsRight { get; }
+        public int ExitsLeft { get; }
+
+        public QState(CellInfo agentCell, CellInfo otherCell, WorldInfo worldInfo)
         {
-            Distance = agent.Distance(other, CellInfo.DistanceType.Manhattan);
+            Distance = agentCell.Distance(otherCell, CellInfo.DistanceType.Manhattan);
 
-            CanMoveUp = worldInfo[agent.x, agent.y + 1].Walkable;
-            CanMoveDown = worldInfo[agent.x, agent.y - 1].Walkable;
-            CanMoveRight = worldInfo[agent.x + 1, agent.y].Walkable;
-            CanMoveLeft = worldInfo[agent.x - 1, agent.y].Walkable;
+            CellInfo upCell = worldInfo[agentCell.x, agentCell.y + 1];
+            CellInfo downCell = worldInfo[agentCell.x, agentCell.y - 1];
+            CellInfo leftCell = worldInfo[agentCell.x - 1, agentCell.y];
+            CellInfo rightCell = worldInfo[agentCell.x + 1, agentCell.y];
 
-            XDirection = other.x - agent.x;
-            YDirection = other.y - agent.y;
+            CanMoveUp = upCell.Walkable;
+            CanMoveDown = downCell.Walkable;
+            CanMoveLeft = leftCell.Walkable;
+            CanMoveRight = rightCell.Walkable;
+
+            XDirection = otherCell.x - agentCell.x;
+            YDirection = otherCell.y - agentCell.y;
+
+            CurrentExits = CountCellExits(worldInfo, agentCell);
+
+            ExitsUp = CountCellExits(worldInfo, upCell);
+            ExitsDown = CountCellExits(worldInfo, downCell);
+            ExitsRight = CountCellExits(worldInfo, rightCell);
+            ExitsLeft = CountCellExits(worldInfo, leftCell);
+        }
+
+        /// <summary>
+        /// Se comprueba cuantas salidas tiene cierta casilla disponibles (es decir, casillas por las que se pueda andar)
+        /// </summary>
+        /// <param name="worldInfo">Mapa del mundo que contiene todas las casillas</param>
+        /// <param name="cell">Casilla de la cual se quiere comprobar su cantidad de salidas</param>
+        /// <returns></returns>
+        private int CountCellExits(WorldInfo worldInfo, CellInfo cell)
+        {
+            if (!cell.Walkable)
+                return 0;
+
+            int exits = 0;
+
+            if (worldInfo[cell.x, cell.y + 1].Walkable)
+            {
+                exits++;
+            }
+
+            if (worldInfo[cell.x, cell.y - 1].Walkable)
+            {
+                exits++;
+            }
+
+            if (worldInfo[cell.x + 1, cell.y].Walkable)
+            {
+                exits++;
+            }
+
+            if (worldInfo[cell.x - 1, cell.y].Walkable)
+            {
+                exits++;
+            }
+
+            return exits;
         }
 
         public string ToKey()
         {
             return $"{CanMoveUp},{CanMoveDown},{CanMoveRight},{CanMoveLeft}"
-            + $"|{XDirection},{YDirection}";
+                   + $"|{XDirection},{YDirection}"
+                   + $"|{ExitsUp},{ExitsDown},{ExitsRight},{ExitsLeft}";
         }
     }
 }
