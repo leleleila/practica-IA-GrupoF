@@ -88,6 +88,8 @@ namespace GrupoF
                 return;
             }
 
+            UnityEngine.Debug.Log($"ENDED TRAIN EPISODE WITH {CurrentStep} STEPS");
+
             StartNewEpisode();
         }
 
@@ -284,6 +286,7 @@ namespace GrupoF
 
             return opponent;
         }
+
         #endregion
     }
 }

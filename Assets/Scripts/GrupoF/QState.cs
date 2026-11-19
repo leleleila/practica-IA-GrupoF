@@ -42,12 +42,8 @@ namespace GrupoF
         private int XDirection { get; }
         private int YDirection { get; }
 
-        // Contabilizamos cuantas salidas tiene la casilla actual y cada posible dirección (para evitar callejones sin salida)
+        // Contabilizamos cuantas salidas tiene la casilla actual para tratar de evitar callejones sin salida
         public int CurrentExits { get; }
-        public int ExitsUp { get; }
-        public int ExitsDown { get; }
-        public int ExitsRight { get; }
-        public int ExitsLeft { get; }
 
         public QState(CellInfo agentCell, CellInfo otherCell, WorldInfo worldInfo)
         {
@@ -67,11 +63,6 @@ namespace GrupoF
             YDirection = otherCell.y - agentCell.y;
 
             CurrentExits = CountCellExits(worldInfo, agentCell);
-
-            ExitsUp = CountCellExits(worldInfo, upCell);
-            ExitsDown = CountCellExits(worldInfo, downCell);
-            ExitsRight = CountCellExits(worldInfo, rightCell);
-            ExitsLeft = CountCellExits(worldInfo, leftCell);
         }
 
         /// <summary>
@@ -113,8 +104,7 @@ namespace GrupoF
         public string ToKey()
         {
             return $"{CanMoveUp},{CanMoveDown},{CanMoveRight},{CanMoveLeft}"
-                   + $"|{XDirection},{YDirection}"
-                   + $"|{ExitsUp},{ExitsDown},{ExitsRight},{ExitsLeft}";
+                   + $"|{XDirection},{YDirection}";
         }
     }
 }
